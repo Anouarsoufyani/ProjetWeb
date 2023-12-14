@@ -10,14 +10,9 @@ import {
 import { ObjectId } from "@mikro-orm/mongodb";
 import { Game } from "./Game";
 import { User } from "./User";
-import { CardIdentifiers } from "./CardType";
+import { Card } from "../CardInterface";
 
-interface Card {
-    symbole: "Coeur" | "Trefle" | "Carreau" | "Pique",
-    identifiant: CardIdentifiers,
-    user: User,
-    isUsable: boolean
-}
+
 
 @Entity()
 export class Hand {
