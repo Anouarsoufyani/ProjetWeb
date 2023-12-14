@@ -10,7 +10,7 @@ import {
 import { ObjectId } from "@mikro-orm/mongodb";
 import { Game } from "./Game";
 import { User } from "./User";
-import { Card } from "../CardInterface";
+import { Card } from "../services/CardInterface";
 
 
 
