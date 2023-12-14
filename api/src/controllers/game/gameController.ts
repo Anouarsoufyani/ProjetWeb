@@ -36,16 +36,28 @@ export class GameController {
 
   static joinGame = async (req: Request, res: Response) => {
     const currentUser = req.user as User; // type correctly
+    console.log("current");
+
+    console.log(currentUser);
+
 
     const userEntity = await DI.userRepository.findOne({
       _id: currentUser._id
     })
+    console.log("entity");
 
+    console.log(userEntity);
+
+
+    console.log(req.body);
 
     const game = await DI.gameRepository.findOne({
 
-      code: req.body.code
+      code: req.body.gameCode
     })
+
+    console.log(game);
+
 
     if (game && userEntity) {
       game.players = [...game.players, userEntity]
@@ -61,24 +73,11 @@ export class GameController {
   static startGame = async (req: Request<startGameRequestDto>, res: Response) => {
     const currentUser = req.user as User; // type correctly
 
-    //Prends User dans bdd à partir de currentUser
-    // const userEntity = await DI.userRepository.findOne({
-    //   _id: currentUser._id
-    // })
-
-    // const currentUser = req.user;
-
-    // const allGames = await DI.gameRepository.findAll({
-    //   owner: currentUser,
-    // });
-
-    // return res.json({ allGames });
-
     //Selectionne une game précise où userEntity/currentUser est le propriétaire
     // et sélectionne la game avec son code unique
     const game = await DI.gameRepository.findOne({
       owner: currentUser,
-      code: req.body.code
+      code: req.body.gameCode
     })
 
     if (game && game?.owner?._id === currentUser._id && game.players.length >= 2) {
