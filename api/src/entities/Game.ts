@@ -35,11 +35,11 @@ export class Game {
   code!: string;
 
   @ManyToMany(() => User)
-  players: User[] = []
+  players: User[] = [];
 
   @ManyToOne(() => User)
   owner: User | undefined;
 
   @OneToMany(() => Hand, (hand) => hand.game)
-  gameHands: Hand[] | undefined;
+  gameHands: Hand[] = [];
 }

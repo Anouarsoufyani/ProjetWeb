@@ -22,7 +22,7 @@ export const DI = {} as {
   em: EntityManager;
   userRepository: EntityRepository<User>;
   gameRepository: EntityRepository<Game>;
-  handReposityory: EntityRepository<Hand>
+  handRepository: EntityRepository<Hand>
 };
 
 const app = express();
@@ -32,7 +32,7 @@ const app = express();
   DI.em = DI.orm.em;
   DI.userRepository = DI.orm.em.getRepository(User);
   DI.gameRepository = DI.orm.em.getRepository(Game);
-  DI.handReposityory = DI.orm.em.getRepository(Hand);
+  DI.handRepository = DI.orm.em.getRepository(Hand);
 
   dotenv.config({ path: "./config/local.env" });
 

@@ -33,12 +33,12 @@ export class User {
   password!: string;
 
   @Property()
-  score!: number;
+  score: number = 0;
 
   @OneToMany(() => Game, (game) => game.owner)
   ownedGames: Game[] | undefined;
 
   @OneToMany(() => Hand, (hand) => hand.owner)
-  userHands: Hand[] | undefined;
+  userHands: Hand[]= [];
 
 }

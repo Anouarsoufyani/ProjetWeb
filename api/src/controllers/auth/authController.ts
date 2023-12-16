@@ -63,6 +63,9 @@ export class AuthController {
 
     const user = await DI.userRepository.find({ email: email });
 
+    console.log(user);
+    
+
     if (!user[0]) {
       errors.message = "Your email or password are incorect";
       return res.status(400).json({ success: false, errors });
@@ -80,6 +83,7 @@ export class AuthController {
         id: user[0]._id,
         username: user[0].username,
         token: "Bearer " + token,
+        score: user[0].score
       });
     } else {
       errors.message = "Your email or password are incorect";

@@ -1,11 +1,15 @@
 import { Request, Response } from "express";
 import { DI } from "../../app";
-import { Game, Hand, User } from "../../entities";
+import { Game, User } from "../../entities";
 import uuid4 from "uuid4";
 import startGameRequestDto from "./dtos/startGameRequestDto";
 import { GameType } from "../../entities/GameType";
 import { CardDeck } from "../../services/CardDeck";
-import { Card } from "../../services/CardInterface";
+import { chooseCard, createHandForAllPlayers, fight } from "../../services/GameService";
+import { CardIdentifiers } from "../../services/CardType";
+import { Card } from "../../CardInterface";
+//  import { CardIdentifiers } from "../../services/CardType";
+// import { Card } from "../../services/CardInterface";
 // import {Card} from "../../services/CardInterface";
 //import joinGameRequestDto from "./dtos/joinGameRequestDto";
 
@@ -83,68 +87,66 @@ export class GameController {
       code: req.body.gameCode
     })
 
-    if (game && game?.owner?._id === currentUser._id && game.players.length >= 2) {
+    //   const user = await DI.userRepository.findOne({
+    //     _id: game?.players[0]._id,
+    // })
+
+    // console.log({playerTest : game?.players[0]});
+    // console.log({playerTestUser : user});
+    // console.log(game?.players[0] == user);
+    // console.log({ownerHand : game?.gameHands[0].owner});
+
+    // console.log(game?.gameHands[0].owner == user);
+
+
+
+    if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10) {
       game.status = GameType.STARTED;
 
       const cardDeck = new CardDeck();
       const paquet = cardDeck.deck;
       const paquetMelange = cardDeck.shuffleDeck(paquet);
 
-      // console.log(paquetMelange);
-
-      // const cards : Card[] = [];
-
-
-      //    Creation de mains
-      const createHand = async (player: User, game: Game, cards: Card[]) => {
-        const newHand = DI.em.create(Hand, {
-          cards: cards,
-          owner: player,
-          game: game,
-
-        });
-
-        await DI.em.persistAndFlush(newHand);
-
-        console.log({ newHand });
-
-      };
-
-
-      // creation de main pour chaque joueur
-      const createHandForAllPlayers = (players: User[], game: Game) => {
-        const nbDeCarteParJoueur = paquet.length / players.length;
-        for (let j = 0; j < players.length; j++) {
-          let paquetJoueur: Card[] = [];
-          for (let i = 0; i < nbDeCarteParJoueur - 1; i++) {
-            const carte = paquetMelange.pop();
-            console.log(carte);
-
-            // paquetJoueur.push(carte);
-          }
-
-          createHand(players[j], game, paquetJoueur); //paquet -> liste de carte
-        }
-
-      }
-
-      createHandForAllPlayers(game.players, game);
-      // console.log(game.players[0].email);
-
-      //   const cardsPerPlayer = Math.floor(deck.length / players.length);
-      //   players.forEach(player => {
-      //       for (let i = 0; i < cardsPerPlayer; i++) {
-      //           player.addCard(deck.pop());
-      //       }
-      //   });
-
-      //generateDeck
-      //distributeCards
+      // CREER MAIN ET DISTRIB CARTES
+      createHandForAllPlayers(game.players, game, paquetMelange);
       await DI.em.persistAndFlush(game);
+      // const cardsTest : Card[] = [
+      //   {
+      //     identifiant: CardIdentifiers.AS,
+      //     symbole: "Coeur",
+      //     isUsable: true 
+      //   },
+      //   {
+      //     identifiant: CardIdentifiers.DEUX,
+      //     symbole: "Coeur",
+      //     isUsable: true
+      //   }];
+
+      let miseEnJeu: Card[] = [];
+      chooseCard(
+        {
+          identifiant: CardIdentifiers.AS,
+          symbole: "Coeur",
+          isUsable: true
+        }, miseEnJeu
+      );
+
+      chooseCard(
+        {
+          identifiant: CardIdentifiers.DEUX,
+          symbole: "Coeur",
+          isUsable: true
+        }, miseEnJeu
+      );
+
+      console.log({ Userdebz: fight(miseEnJeu, game) });
+
 
     } else {
       return res.json("Joueurs insuffisants")
     }
+
+
 
     // if (game && userEntity) {
     //   game.players = [...game.players, userEntity]

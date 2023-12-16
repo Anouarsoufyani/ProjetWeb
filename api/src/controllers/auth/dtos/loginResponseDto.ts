@@ -8,6 +8,7 @@ interface loginResponseDto {
   errors?: {
     message?: string;
   };
+  score?: number;
 }
 
 export default loginResponseDto;
