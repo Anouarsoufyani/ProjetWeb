@@ -5,7 +5,7 @@ import uuid4 from "uuid4";
 import startGameRequestDto from "./dtos/startGameRequestDto";
 import { GameType } from "../../entities/GameType";
 import { CardDeck } from "../../services/CardDeck";
-import { chooseCard, createHandForAllPlayers, fight } from "../../services/GameService";
+import { chooseCard, createHandForAllPlayers, play } from "../../services/GameService";
 import { CardIdentifiers } from "../../services/CardType";
 import { Card } from "../../services/CardInterface";
 //  import { CardIdentifiers } from "../../services/CardType";
@@ -128,20 +128,20 @@ export class GameController {
           identifiant: CardIdentifiers.AS,
           symbole: "Coeur",
           isUsable: true,
-          user: undefined
+          user: game.players[0]
         }, miseEnJeu
       );
 
       chooseCard(
         {
-          identifiant: CardIdentifiers.DEUX,
-          symbole: "Coeur",
+          identifiant: CardIdentifiers.AS,
+          symbole: "Trefle",
           isUsable: true,
-          user: undefined
+          user: game.players[1]
         }, miseEnJeu
       );
 
-      console.log({ Userdebz: fight(miseEnJeu, game) });
+      console.log({ Winner: await play(miseEnJeu, game) });
 
 
     } else {
@@ -163,3 +163,4 @@ export class GameController {
 
 
 }
+

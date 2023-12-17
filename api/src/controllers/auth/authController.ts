@@ -63,9 +63,6 @@ export class AuthController {
 
     const user = await DI.userRepository.find({ email: email });
 
-    console.log(user);
-    
-
     if (!user[0]) {
       errors.message = "Your email or password are incorect";
       return res.status(400).json({ success: false, errors });

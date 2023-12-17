@@ -1,6 +1,6 @@
 import { DI } from "../app";
 import { Game, Hand, User } from "../entities";
-import { GameType } from "../entities/GameType";
+// import { GameType } from "../entities/GameType";
 import { Card } from "./CardInterface";
 import { CARD_POWERS } from "./CardPower";
 
@@ -73,7 +73,7 @@ export const createHandForAllPlayers = (players: User[], game: Game, paquet: Car
 // }
 
 
-export const maxPuiss = (miseEnJeu : Card[]) => {
+export const maxPuiss = (miseEnJeu: Card[]) => {
     let maxPower: Card = miseEnJeu[0];
     for (let i = 1; i < miseEnJeu.length; i++) {
         if (getCardPower(miseEnJeu[i]) > getCardPower(maxPower)) {
@@ -86,12 +86,29 @@ export const maxPuiss = (miseEnJeu : Card[]) => {
 export const chooseCard = (card: Card, miseEnjeu: Card[]) => {
     if (card.isUsable == true) {
         miseEnjeu.push(card);
-        console.log(miseEnjeu);
+        console.log({ ajoutDuneCarte: miseEnjeu });
 
     }
     else {
         console.log("La carte est non jouable");
     }
+}
+
+function chooseCardForPlayer(player: User, game: Game): Card {
+    // Trouver la main du joueur dans game.gameHands
+    const playerHand = game.gameHands.find(hand => hand.owner === player);
+
+    if (!playerHand || playerHand.cards.length === 0) {
+        throw new Error("Aucune carte trouvée pour le joueur ou le joueur n'a pas de cartes.");
+    }
+
+    // Choisir une carte aléatoirement de la main du joueur
+    // console.log(playerHand);
+
+    const cardIndex = Math.floor(Math.random() * playerHand.cards.length);
+    console.log({ nouvelleCarteEnJeu: playerHand.cards[cardIndex] });
+
+    return playerHand.cards[cardIndex];
 }
 
 
@@ -106,47 +123,83 @@ const equivalentCard = (cards: Card[]) => {
     return eqCards;
 }
 
-const joueurGagnant = async (cards: Card[], game : Game) => {
-    const maxPower : Card = maxPuiss(cards);
+const joueurGagnant = async (cards: Card[], game: Game) => {
+    const maxPower: Card = maxPuiss(cards);
+    console.log({ carteGagnant: maxPower });
 
     const jeu = await DI.gameRepository.findOne({
         code: game.code,
     })
 
     if (jeu) {
-        jeu.players.forEach(async player => {
+        for (let i = 0; i < jeu.players.length; i++) {
+            const player = jeu.players[i];
             if (player == maxPower.user) {
                 player.score++;
-                await DI.em.persistAndFlush(jeu)
+                DI.em.persistAndFlush(jeu);
+                console.log({ joueurGagnant: player });
             }
-        });
+        }
+
     }
+
+    return maxPower;
 }
 
-export const play = async (miseEnJeu: Card[], game: Game) => {
-    let cartesEquivalentes : Card[] = equivalentCard(miseEnJeu);
+
+// // Supposition: La fonction chooseCardForPlayer permet aux joueurs de choisir une nouvelle carte
+// function chooseCardForPlayer(player: User): Card {
+//     // Implémentation spécifique pour choisir une nouvelle carte
+//     // Retourne la carte choisie
+// }
+
+// const jeu = async (miseEnJeu: Card[], game: Game) => {
+//     let cartesEquivalentes: Card[] = equivalentCard(miseEnJeu);
+//     let nouvellesCartesEnJeu: Card[] = [];
+
+//     if (cartesEquivalentes.length > 0) {
+//         // Il y a des cartes équivalentes, les joueurs concernés choisissent de nouvelles cartes
+//         let playersInBattle: User[] = cartesEquivalentes.map(card => card.user).filter(user => user !== undefined) as User[];
+
+//         for (const player of playersInBattle) {
+//             const newCard = chooseCardForPlayer(player);
+//             nouvellesCartesEnJeu.push(newCard);
+//         }
+
+//         // Appel de joueurGagnant avec les nouvelles cartes choisies
+//         await joueurGagnant(nouvellesCartesEnJeu, game);
+//     } else {
+//         // Pas de cartes équivalentes, toutes les cartes en jeu sont considérées
+//         await joueurGagnant(miseEnJeu, game);
+//     }
+// }
+
+
+export const play = async (miseEnJeu: Card[], game: Game): Promise<Card> => {
+    let cartesEquivalentes: Card[] = equivalentCard(miseEnJeu);
     //SI CARTES EQ 
     if (cartesEquivalentes.length >= 2) {
         //BATAILLE
-        let nouvellesCartesEnJeu : Card[] = [];
-        let playersInBattle: User[] = [];
-        cartesEquivalentes.forEach(card => {
-            if (card.user != undefined) {
-                playersInBattle.push(card.user)
-            }
-        playersInBattle.forEach(player => {
-            chooseCard(/**/ ,nouvellesCartesEnJeu)
-            play(nouvellesCartesEnJeu,game);
-        });
-        joueurGagnant(cartesEquivalentes, game)
-        });
+        console.log("il y a bataille");
+
+        let nouvellesCartesEnJeu: Card[] = [];
+        let playersInBattle: User[] = cartesEquivalentes.map(card => card.user).filter(user => user !== undefined) as User[];
+
+        for (const player of playersInBattle) {
+            const newCard = chooseCardForPlayer(player, game);// SOCKET, ENVOIE DE LA CARTE PAS L'UTILISATEUR
+            nouvellesCartesEnJeu.push(newCard);
+            console.log({ nouvellesCartesEnJeu: nouvellesCartesEnJeu });
+
+        }
+
+        return play(nouvellesCartesEnJeu, game)
 
         //COMBAT ENTRE USER QUI ON DES CARTES EQ
-        
-    }else{
+
+    } else {
         //PAS BATAILLE, > GAGNE
-        // const winner = joueurGagnant(miseEnJeu);
-        // winner.score++;
+        console.log("QQUN A GAGNE");
+        return joueurGagnant(miseEnJeu, game)
     }
 }
 
@@ -155,24 +208,24 @@ export const play = async (miseEnJeu: Card[], game: Game) => {
 //     for (let k = 1; k < cartesEquivalentes.length; k++) {
 //         for (let j = 0; j < game.gameHands.length; j++) {
 //             for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
-             
+
 //                 if (game.gameHands[j].cards[i].identifiant === cartesEquivalentes[k].identifiant[i] && game.gameHands[j].cards[i].symbole === cartesEquivalentes[k].symbole) {
 //                     game.gameHands[j].cards[i].isUsable = false;
 //                     const user = await DI.userRepository.findOne({
 //                         _id: game.gameHands[j].owner?._id
 //                     })
-    
+
 //                     if (user) {
 //                         playersInBattle.push(user)
-    
+
 //                     }
 //                     return user?.score;
-    
+
 //                 }
 //             }
 //         }
 //     }
-// } 
+// }
 
 
 // export const fight = async (miseEnJeu: Card[], game: Game) => {
@@ -190,19 +243,19 @@ export const play = async (miseEnJeu: Card[], game: Game) => {
 //             for (let k = 1; k < cartesEquivalentes.length; k++) {
 //                 for (let j = 0; j < game.gameHands.length; j++) {
 //                     for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
-                    
+
 //                         if (game.gameHands[j].cards[i].identifiant === cartesEquivalentes[k].identifiant[i] && game.gameHands[j].cards[i].symbole === cartesEquivalentes[k].symbole) {
 //                             game.gameHands[j].cards[i].isUsable = false;
 //                             const user = await DI.userRepository.findOne({
 //                                 _id: game.gameHands[j].owner?._id
 //                             })
-            
+
 //                             if (user) {
 //                                 playersInBattle.push(user)
 //                             }
 //                             // renvoie de socket de chanque user dans playersInBattle de la carte qu'il veut jouer
 //                             return user?.score;
-            
+
 //                         }
 //                     }
 //                 }
@@ -220,18 +273,18 @@ export const play = async (miseEnJeu: Card[], game: Game) => {
 //                         _id: game.gameHands[j].owner?._id
 //                     })
 //                     console.log(user);
-    
-    
+
+
 //                     if (user) {
 //                         console.log({ score1: user.score });
-    
+
 //                         user.score++;
 //                         console.log({ score2: user.score });
-    
+
 //                         await DI.em.persistAndFlush(user);
 //                     }
 //                     return user?.score;
-    
+
 //                 }
 //             }
 //         }
@@ -246,19 +299,19 @@ export const play = async (miseEnJeu: Card[], game: Game) => {
 
 
 
-export const jeu = async (game: Game) => {
-    const scoreFin = 15;
+// export const jeu = async (game: Game) => {
+//     const scoreFin = 15;
 
-    game.players[0].score != scoreFin;
-    while (game.status != GameType.COMPLETED) {
-        let miseEnJeu: Card[] = [];
+//     game.players[0].score != scoreFin;
+//     while (game.status != GameType.COMPLETED) {
+//         let miseEnJeu: Card[] = [];
 
-        for (let i = 0; i < game.players.length; i++) {
-            // envoie du front(joueur) la carte choisie
-            //chooseCard(/*envoie de la socket*/, miseEnJeu);  
-        }
-        // fight(miseEnJeu, game);
+//         for (let i = 0; i < game.players.length; i++) {
+//             // envoie du front(joueur) la carte choisie
+//             //chooseCard(/*envoie de la socket*/, miseEnJeu);
+//         }
+//         // fight(miseEnJeu, game);
 
-    }
+//     }
 
-}
+// }
