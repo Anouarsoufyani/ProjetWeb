@@ -9,6 +9,15 @@ const getCardPower = (card: Card) => {
 }
 
 const createHand = async (player: User, game: Game, cards: Card[]) => {
+
+    // const user = await DI.userRepository.findOne({
+    //     _id: player._id,
+    // })
+
+    cards.forEach(card => {
+        card.user = player
+    });
+
     const newHand = DI.em.create(Hand, {
         cards: cards,
         owner: player,
@@ -22,16 +31,10 @@ const createHand = async (player: User, game: Game, cards: Card[]) => {
         game.gameHands = [...game.gameHands, newHand];
     }
 
-    // const user = await DI.userRepository.findOne({
-    //     _id: player._id,
-    // })
-
     // if (user && newHand) {
     //     user.userHands = [...user.userHands, newHand];
     //     console.log(user);
     //     await DI.em.persistAndFlush(user);
-
-
     // }
 
 };
@@ -56,65 +59,29 @@ export const createHandForAllPlayers = (players: User[], game: Game, paquet: Car
     }
 }
 
-export const addScore = (player: User) => {
-    player.score++;
-}
-
-export const getHandbyCard = (card: Card, game: Game) => {
-    for (let j = 0; j < game.gameHands.length; j++) {
-        for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
-            // console.log(game.gameHands[j].miseEnJeu[i]);
-            // console.log(game.gameHands[j].miseEnJeu[i].identifiant === maxPower.identifiant && game.gameHands[j].miseEnJeu[i].symbole === maxPower.symbole)
-            // console.log(maxPower);
-            if (game.gameHands[j].cards[i].identifiant === card.identifiant && game.gameHands[j].cards[i].symbole === card.symbole) {
-                return game.gameHands[j]
-            }
-        }
-    }
-}
+// export const getHandbyCard = (card: Card, game: Game) => {
+//     for (let j = 0; j < game.gameHands.length; j++) {
+//         for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
+//             // console.log(game.gameHands[j].miseEnJeu[i]);
+//             // console.log(game.gameHands[j].miseEnJeu[i].identifiant === maxPower.identifiant && game.gameHands[j].miseEnJeu[i].symbole === maxPower.symbole)
+//             // console.log(maxPower);
+//             if (game.gameHands[j].cards[i].identifiant === card.identifiant && game.gameHands[j].cards[i].symbole === card.symbole) {
+//                 return game.gameHands[j]
+//             }
+//         }
+//     }
+// }
 
 
-export const fight = async (miseEnJeu: Card[], game: Game) => {
-    //trouve la carte gagnante
+export const maxPuiss = (miseEnJeu : Card[]) => {
     let maxPower: Card = miseEnJeu[0];
     for (let i = 1; i < miseEnJeu.length; i++) {
         if (getCardPower(miseEnJeu[i]) > getCardPower(maxPower)) {
             maxPower = miseEnJeu[i];
         }
     }
-    for (let j = 0; j < game.gameHands.length; j++) {
-        for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
-            // console.log(game.gameHands[j].miseEnJeu[i]);
-            // console.log(game.gameHands[j].miseEnJeu[i].identifiant === maxPower.identifiant && game.gameHands[j].miseEnJeu[i].symbole === maxPower.symbole)
-            // console.log(maxPower);
-            if (game.gameHands[j].cards[i].identifiant === maxPower.identifiant && game.gameHands[j].cards[i].symbole === maxPower.symbole) {
-                game.gameHands[j].cards[i].isUsable = false;
-                //addScore(game.gameHands[j].owner)
-                const user = await DI.userRepository.findOne({
-                    _id: game.gameHands[j].owner?._id
-                })
-                console.log(user);
-
-
-                if (user) {
-                    console.log({ score1: user.score });
-
-                    user.score++;
-                    console.log({ score2: user.score });
-
-                    await DI.em.persistAndFlush(user);
-                }
-                return user?.score;
-
-            }
-        }
-    }
-
+    return maxPower;
 }
-
-
-
-
 
 export const chooseCard = (card: Card, miseEnjeu: Card[]) => {
     if (card.isUsable == true) {
@@ -127,9 +94,155 @@ export const chooseCard = (card: Card, miseEnjeu: Card[]) => {
     }
 }
 
-// export const bataille = () =>{
-//     if()
+
+const equivalentCard = (cards: Card[]) => {
+    let eqCards: Card[] = [];
+    cards.forEach(card => {
+        // Vérifiez si une carte équivalente existe dans la liste
+        if (cards.some(otherCard => otherCard.identifiant === card.identifiant && otherCard !== card)) {
+            eqCards.push(card);
+        }
+    });
+    return eqCards;
+}
+
+const joueurGagnant = async (cards: Card[], game : Game) => {
+    const maxPower : Card = maxPuiss(cards);
+
+    const jeu = await DI.gameRepository.findOne({
+        code: game.code,
+    })
+
+    if (jeu) {
+        jeu.players.forEach(async player => {
+            if (player == maxPower.user) {
+                player.score++;
+                await DI.em.persistAndFlush(jeu)
+            }
+        });
+    }
+}
+
+export const play = async (miseEnJeu: Card[], game: Game) => {
+    let cartesEquivalentes : Card[] = equivalentCard(miseEnJeu);
+    //SI CARTES EQ 
+    if (cartesEquivalentes.length >= 2) {
+        //BATAILLE
+        let nouvellesCartesEnJeu : Card[] = [];
+        let playersInBattle: User[] = [];
+        cartesEquivalentes.forEach(card => {
+            if (card.user != undefined) {
+                playersInBattle.push(card.user)
+            }
+        playersInBattle.forEach(player => {
+            chooseCard(/**/ ,nouvellesCartesEnJeu)
+            play(nouvellesCartesEnJeu,game);
+        });
+        joueurGagnant(cartesEquivalentes, game)
+        });
+
+        //COMBAT ENTRE USER QUI ON DES CARTES EQ
+        
+    }else{
+        //PAS BATAILLE, > GAGNE
+        // const winner = joueurGagnant(miseEnJeu);
+        // winner.score++;
+    }
+}
+
+// export const bataille = async (game: Game, cartesEquivalentes : Card[]) =>{
+//     const playersInBattle: User[] = [];
+//     for (let k = 1; k < cartesEquivalentes.length; k++) {
+//         for (let j = 0; j < game.gameHands.length; j++) {
+//             for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
+             
+//                 if (game.gameHands[j].cards[i].identifiant === cartesEquivalentes[k].identifiant[i] && game.gameHands[j].cards[i].symbole === cartesEquivalentes[k].symbole) {
+//                     game.gameHands[j].cards[i].isUsable = false;
+//                     const user = await DI.userRepository.findOne({
+//                         _id: game.gameHands[j].owner?._id
+//                     })
+    
+//                     if (user) {
+//                         playersInBattle.push(user)
+    
+//                     }
+//                     return user?.score;
+    
+//                 }
+//             }
+//         }
+//     }
 // } 
+
+
+// export const fight = async (miseEnJeu: Card[], game: Game) => {
+//     //trouve la carte gagnante
+//     const maxPower : Card = maxPuiss(miseEnJeu);
+//     let cartesEquivalentes : Card[] = [maxPower];
+//     miseEnJeu.forEach(async carte => {
+//         if (maxPower == carte) {
+//             cartesEquivalentes.push(carte);
+//         }
+//     });
+
+//     if (cartesEquivalentes.length >= 2) {
+//         const playersInBattle: User[] = [];
+//             for (let k = 1; k < cartesEquivalentes.length; k++) {
+//                 for (let j = 0; j < game.gameHands.length; j++) {
+//                     for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
+                    
+//                         if (game.gameHands[j].cards[i].identifiant === cartesEquivalentes[k].identifiant[i] && game.gameHands[j].cards[i].symbole === cartesEquivalentes[k].symbole) {
+//                             game.gameHands[j].cards[i].isUsable = false;
+//                             const user = await DI.userRepository.findOne({
+//                                 _id: game.gameHands[j].owner?._id
+//                             })
+            
+//                             if (user) {
+//                                 playersInBattle.push(user)
+//                             }
+//                             // renvoie de socket de chanque user dans playersInBattle de la carte qu'il veut jouer
+//                             return user?.score;
+            
+//                         }
+//                     }
+//                 }
+//             }
+//     }else{
+//         for (let j = 0; j < game.gameHands.length; j++) {
+//             for (let i = 0; i + 1 < game.gameHands[j].cards.length; i++) {
+//                 // console.log(game.gameHands[j].miseEnJeu[i]);
+//                 // console.log(game.gameHands[j].miseEnJeu[i].identifiant === maxPower.identifiant && game.gameHands[j].miseEnJeu[i].symbole === maxPower.symbole)
+//                 // console.log(maxPower);
+//                 if (game.gameHands[j].cards[i].identifiant === maxPower.identifiant && game.gameHands[j].cards[i].symbole === maxPower.symbole) {
+//                     game.gameHands[j].cards[i].isUsable = false;
+//                     //addScore(game.gameHands[j].owner)
+//                     const user = await DI.userRepository.findOne({
+//                         _id: game.gameHands[j].owner?._id
+//                     })
+//                     console.log(user);
+    
+    
+//                     if (user) {
+//                         console.log({ score1: user.score });
+    
+//                         user.score++;
+//                         console.log({ score2: user.score });
+    
+//                         await DI.em.persistAndFlush(user);
+//                     }
+//                     return user?.score;
+    
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+
+
+
+
 
 
 
@@ -144,7 +257,7 @@ export const jeu = async (game: Game) => {
             // envoie du front(joueur) la carte choisie
             //chooseCard(/*envoie de la socket*/, miseEnJeu);  
         }
-        fight(miseEnJeu, game);
+        // fight(miseEnJeu, game);
 
     }
 

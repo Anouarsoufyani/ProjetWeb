@@ -22,22 +22,26 @@ export class CardDeck {
             paquet.push({
                 identifiant: identifier as CardIdentifiers,
                 symbole: "Coeur",
-                isUsable: false
+                isUsable: false,
+                user: undefined
             })
             paquet.push({
                 identifiant: identifier as CardIdentifiers,
                 symbole: "Carreau",
-                isUsable: false
+                isUsable: false,
+                user: undefined
             })
             paquet.push({
                 identifiant: identifier as CardIdentifiers,
                 symbole: "Pique",
-                isUsable: false
+                isUsable: false,
+                user: undefined
             })
             paquet.push({
                 identifiant: identifier as CardIdentifiers,
                 symbole: "Trefle",
-                isUsable: false
+                isUsable: false,
+                user: undefined
             })
         })
 

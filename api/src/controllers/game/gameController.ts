@@ -7,7 +7,7 @@ import { GameType } from "../../entities/GameType";
 import { CardDeck } from "../../services/CardDeck";
 import { chooseCard, createHandForAllPlayers, fight } from "../../services/GameService";
 import { CardIdentifiers } from "../../services/CardType";
-import { Card } from "../../CardInterface";
+import { Card } from "../../services/CardInterface";
 //  import { CardIdentifiers } from "../../services/CardType";
 // import { Card } from "../../services/CardInterface";
 // import {Card} from "../../services/CardInterface";
@@ -127,7 +127,8 @@ export class GameController {
         {
           identifiant: CardIdentifiers.AS,
           symbole: "Coeur",
-          isUsable: true
+          isUsable: true,
+          user: undefined
         }, miseEnJeu
       );
 
@@ -135,7 +136,8 @@ export class GameController {
         {
           identifiant: CardIdentifiers.DEUX,
           symbole: "Coeur",
-          isUsable: true
+          isUsable: true,
+          user: undefined
         }, miseEnJeu
       );
 
