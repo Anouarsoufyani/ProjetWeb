@@ -1,49 +1,83 @@
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Link } from "@mui/material";
-import { useGetAllGames } from "../../../hooks/game.hooks"
+// import React, { useState, useEffect } from 'react';
+// import io from 'socket.io-client';
 
-const Partie = () => {
+// import { useState, useEffect } from "react";
+import { io } from "socket.io-client";
 
-    const getAllGamesQuery = useGetAllGames()
+const Partie: React.FC = () => {
 
-    const games = getAllGamesQuery.data?.data.games;
+    const socket = io('http://localhost:5000/'); // Utilisez le même port que votre serveur
+    const sendMessage = () => {
+        socket.emit("send_message", { message: "Hello" })
+    }
 
-    console.log({ games })
+    // socket.emit('joueur', games.owner);
+
+    // socket.on('mainDeCartes', (nouvelleMain) => {
+    //     console.log({ main: nouvelleMain });
+    // });
 
     return (
-        <>
-            {getAllGamesQuery.isLoading ? (
-                <div>Loqding</div>
-            ) : (
-                <TableContainer component={Paper}>
-                    <Table sx={{ minWidth: 650 }} aria-label="simple table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell align="left">Game Number</TableCell>
-                                <TableCell align="left">NbPlayers</TableCell>
-                                <TableCell align="left">Status</TableCell>
-                                <TableCell align="left">Join</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {games.map((game: any) => (
-                                <TableRow
-                                    key={game.type}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
-                                    <TableCell align="left">{game.code}</TableCell>
-                                    <TableCell align="left">{game.players.length}/10</TableCell>
-                                    <TableCell align="left">{game.status}</TableCell>
-                                    <TableCell align="left"> <Link href={game.code}>Join the game</Link></TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer >
-            )}
+        <div>
+            <h1>Chat de la partie</h1>
+            {/* <h2 style={{ color: "white" }}>{games.owner}</h2> */}
+            <input type="text" />
+            <button onClick={sendMessage}>Envoyer le message</button>
+        </div>
+    );
+};
 
+export default Partie;
 
-        </>
-    )
-}
+// const Partie: React.FC = () => {
+//     const [mainDeCartes, setMainDeCartes] = useState<string[]>([]);
+//     const [message, setMessage] = useState<string>('');
+//     const socket = io('http://localhost:5000/game/start'); // Utilisez le même port que votre serveur
 
-export default Partie
+//     useEffect(() => {
+//         // Écoutez l'événement 'mainDeCartes' émis par le serveur
+//         socket.on('mainDeCartes', (nouvelleMain: string[]) => {
+//             setMainDeCartes(nouvelleMain);
+//         });
+
+//         // Écoutez l'événement 'message' émis par le serveur
+//         socket.on('message', (data: string) => {
+//             setMessage(data);
+//         });
+
+//         // Nettoyez le socket lors du démontage du composant
+//         return () => {
+//             socket.disconnect();
+//         };
+//     }, [socket]);
+
+//     const genererOptions = () => {
+//         // Émettez un événement au serveur pour demander la nouvelle main
+//         socket.emit('demanderMainDeCartes');
+//     };
+
+//     return (
+//         <div>
+//             <h1>Page de la partie</h1>
+
+//             <label htmlFor="cartes">Choisissez vos cartes :</label>
+//             <select id="cartes" name="cartes" multiple>
+//                 {mainDeCartes.map((carte, index) => (
+//                     <option key={index} value={carte}>
+//                         {carte}
+//                     </option>
+//                 ))}
+//             </select>
+
+//             <button type="button" onClick={genererOptions}>
+//                 Générer Options
+//             </button>
+
+//             <div>
+//                 <p>Message du serveur : {message}</p>
+//             </div>
+//         </div>
+//     );
+// };
+
+// export default Partie;

@@ -1,14 +1,39 @@
 import { DI } from "../app";
 import { Game, Hand, User } from "../entities";
-// import { GameType } from "../entities/GameType";
+// import { GameStatus } from "../entities/GameStatus";
 import { Card } from "./CardInterface";
 import { CARD_POWERS } from "./CardPower";
+
+
+
+
+
+// import { Socket, Server as SocketIOServer } from 'socket.io';
+// import express from 'express';
+// import { io } from "socket.io";
+
+// const app = express();
+// const httpServer = app.listen(5000, () => {
+//     console.log(`Serveur de jeu en cours d'exécution sur le port`);
+// });
+
+// const io = new SocketIOServer(httpServer);
+
+// // ... Votre logique pour le serveur de jeu
+
+// io.on('connection', (socket) => {
+//     console.log("'Un client s'est connecté au serveur de jeu'");
+// });
 
 const getCardPower = (card: Card) => {
     return CARD_POWERS[card.identifiant]
 }
 
-const createHand = async (player: User, game: Game, cards: Card[]) => {
+
+
+
+
+export const createHand = async (player: User, game: Game, cards: Card[]) => {
 
     // const user = await DI.userRepository.findOne({
     //     _id: player._id,
@@ -18,6 +43,8 @@ const createHand = async (player: User, game: Game, cards: Card[]) => {
         card.user = player
     });
 
+
+
     const newHand = DI.em.create(Hand, {
         cards: cards,
         owner: player,
@@ -26,6 +53,26 @@ const createHand = async (player: User, game: Game, cards: Card[]) => {
     });
 
     await DI.em.persistAndFlush(newHand);
+
+    // const listeDeMain = newHand.cards;
+    // io.on('connection', (socket: Socket) => {
+    //     console.log("'Un client s'est connecté au serveur de jeu'");
+    //     // Envoyer la liste de main au client dès la connexion
+    //     io.to(socket.id).emit('mainDeCartes', listeDeMain);
+    //     // Gérer l'événement 'demanderMainDeCartes' du client
+    //     socket.on('demanderMainDeCartes', () => {
+    //         // Vous pouvez ajouter ici une logique pour générer une nouvelle main si nécessaire
+    //         // puis envoyer la nouvelle main mise à jour à tous les clients connectés
+    //         io.emit('mainDeCartes', listeDeMain);
+    //     });
+
+    //     // Autres logiques de gestion des événements...
+
+    //     socket.on('disconnect', () => {
+    //         console.log("'Un client s'est déconnecté du serveur de jeu'");
+    //     });
+    // });
+
 
     if (game && newHand) {
         game.gameHands = [...game.gameHands, newHand as Hand];
@@ -159,8 +206,8 @@ const joueurGagnant = async (cards: Card[]) => {
 //     }
 // }
 
-
 export const play = async (miseEnJeu: Card[], game: Game): Promise<Card> => {
+
     let cartesEquivalentes: Card[] = equivalentCard(miseEnJeu);
     //SI CARTES EQ 
     if (cartesEquivalentes.length >= 2) {
@@ -187,6 +234,8 @@ export const play = async (miseEnJeu: Card[], game: Game): Promise<Card> => {
         return await joueurGagnant(miseEnJeu);
     }
 }
+
+
 
 // export const bataille = async (game: Game, cartesEquivalentes : Card[]) =>{
 //     const playersInBattle: User[] = [];

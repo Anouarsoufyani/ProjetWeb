@@ -23,6 +23,9 @@ export class GameController {
 
 
 
+
+
+
   static createGame = async (req: Request, res: Response) => {
     const currentUser = req.user;
 
@@ -109,6 +112,7 @@ export class GameController {
       // CREER MAIN ET DISTRIB CARTES
       createHandForAllPlayers(game.players, game, paquetMelange);
       await DI.em.persistAndFlush(game);
+
       // const cardsTest : Card[] = [
       //   {
       //     identifiant: CardIdentifiers.AS,

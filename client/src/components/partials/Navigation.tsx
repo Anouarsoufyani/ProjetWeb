@@ -49,6 +49,30 @@ const Navigation = () => {
               </Button>
               <Button
                 component={Link}
+                to="/join-game"
+                sx={{ m: 2 }}
+                color="inherit"
+              >
+                Join Game
+              </Button>
+              <Button
+                component={Link}
+                to="/my-games"
+                sx={{ m: 2 }}
+                color="inherit"
+              >
+                My Games
+              </Button>
+              <Button
+                component={Link}
+                to="/partie"
+                sx={{ m: 2 }}
+                color="inherit"
+              >
+                Partie
+              </Button>
+              <Button
+                component={Link}
                 to="/scores"
                 sx={{ m: 2 }}
                 color="inherit"

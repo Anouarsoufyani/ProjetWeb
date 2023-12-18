@@ -1,11 +1,15 @@
-import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody, Link } from "@mui/material";
-import { useGetAllGames, useJoinGameMutation } from "../../../hooks/game.hooks"
+import { TableContainer, Paper, Table, TableHead, TableRow, TableCell, TableBody } from "@mui/material";
+import { useGetAllGames } from "../../../hooks/game.hooks"
+import { Link } from "react-router-dom";
+import { io } from "socket.io-client";
+
 
 const MyGames = () => {
 
     const getAllGamesQuery = useGetAllGames()
 
     const games = getAllGamesQuery.data?.data.games;
+
 
     return (
         <>
@@ -24,17 +28,11 @@ const MyGames = () => {
                         </TableHead>
                         <TableBody>
                             {games.map((game: any) => (
-                                <TableRow
-                                    key={game.type}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
+                                <TableRow>
                                     <TableCell align="left">{game.code}</TableCell>
                                     <TableCell align="left">{game.players.length}/10</TableCell>
                                     <TableCell align="left">{game.status}</TableCell>
-                                    <TableCell align="left"> <Link href="/game/join/:game.code">Join the game</Link></TableCell>
-                                    <Switch>
-                                        <Route path="/:id" children={<Child />} />
-                                    </Switch>
+                                    <TableCell align="left"> <Link to={`/join-game/${game.code}`}>Join the game</Link></TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>
