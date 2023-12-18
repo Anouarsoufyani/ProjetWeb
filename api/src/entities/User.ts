@@ -39,6 +39,6 @@ export class User {
   ownedGames: Game[] | undefined;
 
   @OneToMany(() => Hand, (hand) => hand.owner)
-  userHands: Hand[]= [];
+  userHands: Hand[] = [];
 
 }

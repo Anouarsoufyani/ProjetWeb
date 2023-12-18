@@ -10,7 +10,7 @@ import {
 } from "@mikro-orm/core";
 import { ObjectId } from "@mikro-orm/mongodb";
 import { User } from "./User";
-import { GameType } from "./GameType";
+import { GameStatus } from "./GameStatus";
 import { Hand } from "./Hand";
 
 @Entity()
@@ -27,8 +27,8 @@ export class Game {
   @Property()
   type!: string;
 
-  @Enum({ default: GameType.UNSTARTED })
-  status = GameType.UNSTARTED;
+  @Enum({ default: GameStatus.UNSTARTED })
+  status = GameStatus.UNSTARTED;
 
   @Property()
   @Unique()

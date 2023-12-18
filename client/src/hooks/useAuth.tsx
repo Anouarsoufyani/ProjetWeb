@@ -47,7 +47,6 @@ export const AuthProvider = ({
     setLoading(true);
     try {
       const { data } = await AuthService.login(params);
-      console.log("dataFromContext - ", data);
 
       const token = data.token ?? "";
       localStorage.setItem("access_token", token);
@@ -72,7 +71,7 @@ export const AuthProvider = ({
     }
 
     setLoading(false);
-    history.push("/dashboard");
+    history.push("/");
   };
 
   const register = async (params: registerRequestDto) => {

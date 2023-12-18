@@ -62,9 +62,8 @@ const Login = () => {
                   </label>
                   <input
                     {...register("email")}
-                    className={`form-control ${
-                      errors?.email ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors?.email ? "is-invalid" : ""
+                      }`}
                     id="email"
                     aria-describedby="emailHelp"
                   />
@@ -78,9 +77,8 @@ const Login = () => {
                   </label>
                   <input
                     type="password"
-                    className={`form-control ${
-                      errors?.password ? "is-invalid" : ""
-                    }`}
+                    className={`form-control ${errors?.password ? "is-invalid" : ""
+                      }`}
                     {...register("password")}
                   />
                   {errors?.password && (

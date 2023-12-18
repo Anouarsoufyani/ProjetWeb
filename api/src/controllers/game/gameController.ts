@@ -3,26 +3,25 @@ import { DI } from "../../app";
 import { Game, User } from "../../entities";
 import uuid4 from "uuid4";
 import startGameRequestDto from "./dtos/startGameRequestDto";
-import { GameType } from "../../entities/GameType";
+import { GameStatus } from "../../entities/GameStatus";
 import { CardDeck } from "../../services/CardDeck";
 import { chooseCard, createHandForAllPlayers, play } from "../../services/GameService";
 import { CardIdentifiers } from "../../services/CardType";
 import { Card } from "../../services/CardInterface";
-//  import { CardIdentifiers } from "../../services/CardType";
-// import { Card } from "../../services/CardInterface";
-// import {Card} from "../../services/CardInterface";
-//import joinGameRequestDto from "./dtos/joinGameRequestDto";
+
 
 export class GameController {
   static getAllGames = async (req: Request, res: Response) => {
     const currentUser = req.user;
 
-    const allGames = await DI.gameRepository.findAll({
+    const games = await DI.gameRepository.findAll({
       owner: currentUser,
     });
 
-    return res.json({ allGames });
+    return res.json({ games });
   };
+
+
 
   static createGame = async (req: Request, res: Response) => {
     const currentUser = req.user;
@@ -32,12 +31,12 @@ export class GameController {
       code: uuid4(),
       owner: currentUser,
       players: [currentUser],
-      status: "unstarted"
+      status: GameStatus.UNSTARTED
     });
 
     await DI.em.persistAndFlush(newGame);
 
-    return res.json({ newGame });
+    return res.json({ ...newGame });
   };
 
 
@@ -101,7 +100,7 @@ export class GameController {
 
 
     if (game && game?.owner?._id === currentUser._id && game.players.length >= 2 && game.players.length <= 10) {
-      game.status = GameType.STARTED;
+      game.status = GameStatus.STARTED;
 
       const cardDeck = new CardDeck();
       const paquet = cardDeck.deck;
@@ -141,7 +140,35 @@ export class GameController {
         }, miseEnJeu
       );
 
-      console.log({ Winner: await play(miseEnJeu, game) });
+      const addScore = async (card: Card, players: User[]) => {
+        const user = await DI.userRepository.findOne({
+          _id: card.user?._id,
+        })
+
+        let tabscore = [];
+        for (let i = 0; i < players.length; i++) {
+          tabscore.push({ id: players[i]._id, score: 0 });
+        }
+
+
+        for (let j = 0; j < players.length; j++) {
+          if (user) {
+            // DI.em.persistAndFlush(user);
+
+            if (tabscore[j].id == user?._id) {
+              tabscore[j].score++;
+            }
+            console.log(tabscore[j].id);
+            console.log(tabscore[j].score);
+          }
+        }
+        return tabscore;
+      }
+
+
+      console.log(addScore(await play(miseEnJeu, game), game.players));
+
+
 
 
     } else {

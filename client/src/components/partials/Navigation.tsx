@@ -12,7 +12,7 @@ const Navigation = () => {
           <Typography
             color="inherit"
             component={Link}
-            to={!token && !user ? "/" : "/dashboard"}
+            to="/"
             variant="h6"
             sx={{ flexGrow: 1, textDecoration: "none" }}
           >

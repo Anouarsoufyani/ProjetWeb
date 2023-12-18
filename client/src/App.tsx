@@ -14,6 +14,8 @@ import {
 import useAuth, { AuthProvider } from "./hooks/useAuth";
 
 import CreateGame from "./pages/Game/CreateGame/CreateGame";
+import MyGames from "./pages/Game/MyGames/MyGames";
+import JoinGame from "./pages/Game/JoinGame/JoinGame";
 
 function AuthenticatedRoute({ path, component }: RouteProps) {
   const { token, user } = useAuth();
@@ -33,6 +35,8 @@ const App = () => {
             <Route path="/register" component={Register} />
             <Route path="/login" component={Login} />
             <AuthenticatedRoute path="/create-game" component={CreateGame} />
+            <AuthenticatedRoute path="/my-games" component={MyGames} />
+            <AuthenticatedRoute path="/join-game/:code" component={JoinGame} />
             <Route path="/" component={Home} />
           </Switch>
         </div>

@@ -1,4 +1,4 @@
-export enum GameType {
+export enum GameStatus {
     UNSTARTED = 'unstarted',
     STARTED = 'started',
     PAUSED = 'paused',

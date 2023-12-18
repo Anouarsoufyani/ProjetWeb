@@ -28,7 +28,7 @@ const createHand = async (player: User, game: Game, cards: Card[]) => {
     await DI.em.persistAndFlush(newHand);
 
     if (game && newHand) {
-        game.gameHands = [...game.gameHands, newHand];
+        game.gameHands = [...game.gameHands, newHand as Hand];
     }
 
     // if (user && newHand) {
@@ -123,28 +123,13 @@ const equivalentCard = (cards: Card[]) => {
     return eqCards;
 }
 
-const joueurGagnant = async (cards: Card[], game: Game) => {
+const joueurGagnant = async (cards: Card[]) => {
     const maxPower: Card = maxPuiss(cards);
     console.log({ carteGagnant: maxPower });
 
-    const jeu = await DI.gameRepository.findOne({
-        code: game.code,
-    })
-
-    if (jeu) {
-        for (let i = 0; i < jeu.players.length; i++) {
-            const player = jeu.players[i];
-            if (player == maxPower.user) {
-                player.score++;
-                DI.em.persistAndFlush(jeu);
-                console.log({ joueurGagnant: player });
-            }
-        }
-
-    }
-
     return maxPower;
 }
+
 
 
 // // Supposition: La fonction chooseCardForPlayer permet aux joueurs de choisir une nouvelle carte
@@ -199,7 +184,7 @@ export const play = async (miseEnJeu: Card[], game: Game): Promise<Card> => {
     } else {
         //PAS BATAILLE, > GAGNE
         console.log("QQUN A GAGNE");
-        return joueurGagnant(miseEnJeu, game)
+        return await joueurGagnant(miseEnJeu);
     }
 }
 
